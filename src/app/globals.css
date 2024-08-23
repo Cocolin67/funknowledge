@@ -31,3 +31,29 @@ body {
     text-wrap: balance;
   }
 }
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    -webkit-transform: translateY(20px);
+    -moz-transform: translateY(20px);
+    -ms-transform: translateY(20px);
+    -o-transform: translateY(20px);
+} 
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.message-animation {
+  animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.message-fadeout {
+  animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1) reverse;
+  -webkit-animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1) reverse;
+}
