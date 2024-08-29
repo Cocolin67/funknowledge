@@ -14,16 +14,17 @@ const QuizInterface = () => {
   useEffect(() => {
     const handleQuizStarted = (started) => {
       if (started) {
+        clearInterval(timer);
         setQuizStarted(true);
-        console.log("Quiz started");
       } else {
+        clearInterval(timer);
         setQuizStarted(false);
         setQuizQuestion("");
-        console.log("Quiz ended");
       }
     };
 
     const handleQuizQuestion = (question) => {
+      clearInterval(timer);
       setQuizQuestion(question);
       setTimeLeft(timeLimit); // Réinitialiser le temps restant au début du quiz
     };
@@ -59,14 +60,14 @@ const QuizInterface = () => {
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <p className="text-lg font-bold">{timeLeft} seconds left</p>
+          <p className="text-lg font-bold">{timeLeft} secondes restantes</p>
         </div>
       ) : (
         <button
           onClick={handleStartQuiz}
           className="bg-blue-500 text-white rounded p-4 px-10 m-auto text-2xl font-bold drop-shadow-lg"
         >
-          Start Quiz
+          Commencer le quiz
         </button>
       )}
     </div>

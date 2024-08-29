@@ -15,15 +15,15 @@ app.prepare().then(() => {
 
   const questions = [
     {
-      question: "What is the capital of France?",
+      question: "Quelle est la capitale de la France ?",
       answer: "Paris",
     },
     {
-      question: "What is the largest planet in our solar system?",
+      question: "Quelle est la plus grande planète de notre système solaire ?",
       answer: "Jupiter",
     },
     {
-      question: "How many continents are there?",
+      question: "Combien y a-t-il de continents ?",
       answer: "7",
     },
   ];
@@ -35,7 +35,7 @@ app.prepare().then(() => {
 
   function startQuiz(socket) {
     console.log("Starting quiz...");
-    io.emit("server_message", "Starting quiz...");
+    io.emit("server_message", "Démarrage du quiz...");
     io.emit("quiz_started", true);
 
     // Commencer le quiz après un court délai
@@ -51,7 +51,7 @@ app.prepare().then(() => {
 
     // Délai pour recevoir la réponse (par exemple, 15 secondes)
     answerTimeout = setTimeout(() => {
-      io.emit("server_message", "Time's up! No correct answer received.");
+      io.emit("server_message", "Temps écoulé ! Aucune bonne réponse reçu.");
       endQuiz(); // Optionnel : Terminer le quiz ou demander la question suivante
     }, 15000); // Temps limite de 15 secondes
   }
@@ -69,7 +69,6 @@ app.prepare().then(() => {
     socket.on("join", (username) => {
       socket.username = username;
 
-      io.emit("alert_message", `${username} has joined the quiz.`);
       console.log(`User connected: ${username}`);
 
       // Ajouter le joueur connecté à la liste des joueurs connectés
@@ -87,7 +86,7 @@ app.prepare().then(() => {
 
       // Vérification de la réponse pendant le quiz
       if (quizStarted && currentQuestion && currentQuestion.answer.toLowerCase() === data.toLowerCase()) {
-        io.emit("server_message", `Good job ${socket.username}! The answer is correct.`);
+        io.emit("server_message", `Bien joué ${socket.username}, bonne réponse !`);
         clearTimeout(answerTimeout); // Annuler le timeout si la réponse correcte est donnée
         endQuiz(); // Terminer le quiz ou demander la question suivante
       }
@@ -107,7 +106,6 @@ app.prepare().then(() => {
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.username}`);
-      io.emit("alert_message", `${socket.username} has left the quiz.`);
 
       // Supprimer le joueur déconnecté de la liste des joueurs connectés
       connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);

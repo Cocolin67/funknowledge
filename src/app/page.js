@@ -23,12 +23,12 @@ export default function Home() {
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
-      toast.success("Connected to the server");
+      toast.success("Connecté au serveur !");
     }
 
     function onDisconnect() {
       setIsConnected(false);
-      toast.error("Disconnected from the server."); // Test pour afficher une notification d'erreur
+      toast.error("Déconnecté du serveur..."); // Test pour afficher une notification d'erreur
     }
 
     function onServerMessageReceived(message) {
@@ -52,8 +52,6 @@ export default function Home() {
       socket.emit("join", username);
       console.log("User connected:", username);
       setIsModalOpen(false);
-    } else {
-      console.log("Please enter a username");
     }
   };
 
@@ -70,7 +68,7 @@ export default function Home() {
         {isModalOpen && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
             <div className="bg-white p-6 rounded shadow-lg">
-              <h2 className="text-xl font-bold mb-4 text-black">Enter your username</h2>
+              <h2 className="text-xl font-bold mb-4 text-black">Entrez un nom d&apos;utilisateur</h2>
               <form onSubmit={handleUsernameSubmit}>
                 <input
                   type="text"
@@ -83,7 +81,7 @@ export default function Home() {
                   type="submit"
                   className="bg-blue-500 text-white rounded p-2 w-full"
                 >
-                  Join
+                  Rejoindre
                 </button>
               </form>
             </div>
