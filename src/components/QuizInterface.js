@@ -54,13 +54,17 @@ const QuizInterface = () => {
       {quizStarted ? (
         <div className="text-center">
           <h2 className="text-3xl font-bold m-auto mb-4">{quizQuestion}</h2>
+          {quizQuestion !== "" && (
+          <>
           <div className="w-full bg-gray-300 rounded-full h-4 mb-4">
             <div
-              className="bg-blue-600 h-4 rounded-full"
+              className="quiz_progress-bar-inner bg-blue-600 h-4 rounded-full"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
           <p className="text-lg font-bold">{timeLeft} secondes restantes</p>
+          </>
+          )}
         </div>
       ) : (
         <button

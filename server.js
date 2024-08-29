@@ -53,7 +53,7 @@ app.prepare().then(() => {
     answerTimeout = setTimeout(() => {
       io.emit("server_message", "Temps écoulé ! Aucune bonne réponse reçu.");
       endQuiz(); // Optionnel : Terminer le quiz ou demander la question suivante
-    }, 15000); // Temps limite de 15 secondes
+    }, 16000); // Temps limite de 15 secondes ++ une extra seconde pour laisser le temps de répondre
   }
 
   function endQuiz() {

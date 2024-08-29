@@ -57,3 +57,14 @@ body {
   animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1) reverse;
   -webkit-animation: flash 0.5s cubic-bezier(0.22, 1, 0.36, 1) reverse;
 }
+
+/* QUIZ PROGRESSBAR */
+/* styles.css ou fichier CSS associé */
+
+.quiz_progress-bar-inner {
+  transition: width 1s linear;
+  -webkit-transition: width 1s linear;
+  -moz-transition: width 1s linear;
+  -ms-transition: width 1s linear;
+  -o-transition: width 1s linear;
+}
