@@ -75,7 +75,7 @@ export default function Home() {
                   className="border border-gray-300 rounded p-2 w-full mb-4 text-black"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Your username"
+                  placeholder="Nom d'utilisateur"
                 />
                 <button
                   type="submit"
