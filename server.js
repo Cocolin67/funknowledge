@@ -16,94 +16,104 @@ app.prepare().then(() => {
   const questions = [
     {
       question: "What is the capital of France?",
-      answer: "Paris"
+      answer: "Paris",
     },
     {
       question: "What is the largest planet in our solar system?",
-      answer: "Jupiter"
+      answer: "Jupiter",
     },
     {
       question: "How many continents are there?",
-      answer: "7"
-    }
+      answer: "7",
+    },
   ];
 
-  const connectedPlayers = [];
-
+  let connectedPlayers = [];
   let quizStarted = false; // Déclaration à l'extérieur du gestionnaire de connexion
+  let currentQuestion = null;
+  let answerTimeout = null; // Pour gérer le temps limite pour les réponses
 
   function startQuiz(socket) {
     console.log("Starting quiz...");
     io.emit("server_message", "Starting quiz...");
+    io.emit("quiz_started", true);
 
+    // Commencer le quiz après un court délai
     setTimeout(() => {
-      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-      io.emit("server_message", randomQuestion.question);
-      socket.currentQuestion = randomQuestion; // Sauvegarde de la question actuelle pour vérification
-    }, 2000);
+      askQuestion(socket);
+    }, 5000);
+  }
 
-    // Ecouteur pour recevoir la réponse à la question du quiz
-    socket.once("message", (data) => {
-      console.log("Received answer:", data);
-      if (socket.currentQuestion && socket.currentQuestion.answer.toLowerCase() === data.toLowerCase()) {
-        io.emit("server_message", "Good job " + socket.username + " ! The answer is correct.");
-      } else {
-        io.emit("server_message", "Incorrect answer " + socket.username + ". Try again next time.");
-      }
+  function askQuestion(socket) {
+    // Sélectionner une question au hasard
+    currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+    io.emit("quiz_question", currentQuestion.question);
 
-      // Fermeture du quiz après la réponse
-      setTimeout(() => {
-        io.emit("server_message", "");
-        quizStarted = false; // Réinitialise quizStarted pour permettre un nouveau quiz
-      }, 2000);
-    });
+    // Délai pour recevoir la réponse (par exemple, 15 secondes)
+    answerTimeout = setTimeout(() => {
+      io.emit("server_message", "Time's up! No correct answer received.");
+      endQuiz(); // Optionnel : Terminer le quiz ou demander la question suivante
+    }, 15000); // Temps limite de 15 secondes
+  }
+
+  function endQuiz() {
+    io.emit("quiz_started", false);
+    quizStarted = false; // Réinitialiser l'état du quiz pour permettre un nouveau quiz
+    currentQuestion = null; // Réinitialiser la question actuelle
+    if (answerTimeout) clearTimeout(answerTimeout); // Annuler tout timeout restant
   }
 
   io.on("connection", (socket) => {
-  console.log("New client connected");
+    console.log("New client connected");
 
-  socket.on("join", (username) => {
-    socket.username = username;
+    socket.on("join", (username) => {
+      socket.username = username;
 
-    io.emit("alert_message", `${username} has joined the quiz.`);
-    console.log(`User connected: ${username}`);
+      io.emit("alert_message", `${username} has joined the quiz.`);
+      console.log(`User connected: ${username}`);
 
-    // Ajouter le joueur connecté à la liste des joueurs connectés
-    const player = { id: socket.id, username };
-    connectedPlayers.push(player);
+      // Ajouter le joueur connecté à la liste des joueurs connectés
+      const player = { id: socket.id, username };
+      connectedPlayers.push(player);
 
-    // Envoyer la liste des joueurs connectés à tous les clients
-    io.emit("players", connectedPlayers.map((player) => player.username));
+      // Envoyer la liste des joueurs connectés à tous les clients
+      io.emit("players", connectedPlayers.map((player) => player.username));
+    });
 
-  });
+    socket.on("message", (data) => {
+      // Handle incoming message
+      console.log("Received message:", data);
+      io.emit("message", socket.username + " : " + data);
 
-  socket.on("message", (data) => {
-    // Handle incoming message
-    console.log("Received message:", data);
-    io.emit("message", socket.username + " : " + data);
-
-    if (!quizStarted) {
-      if (data === "startquiz") {
-        quizStarted = true; // Définir quizStarted sur true avant de lancer le quiz
-        startQuiz(socket); // Lance le quiz
+      // Vérification de la réponse pendant le quiz
+      if (quizStarted && currentQuestion && currentQuestion.answer.toLowerCase() === data.toLowerCase()) {
+        io.emit("server_message", `Good job ${socket.username}! The answer is correct.`);
+        clearTimeout(answerTimeout); // Annuler le timeout si la réponse correcte est donnée
+        endQuiz(); // Terminer le quiz ou demander la question suivante
       }
-    }
+    });
+
+    socket.on("start_quiz", () => {
+      if (!quizStarted) {
+        quizStarted = true;
+        startQuiz(socket);
+      }
+    });
+
+    socket.on("get_players", () => {
+      // Envoyer la liste des joueurs connectés à tous les clients
+      io.emit("players", connectedPlayers.map((player) => player.username));
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`User disconnected: ${socket.username}`);
+      io.emit("alert_message", `${socket.username} has left the quiz.`);
+
+      // Supprimer le joueur déconnecté de la liste des joueurs connectés
+      connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);
+      io.emit("players", connectedPlayers.map((player) => player.username));
+    });
   });
-
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.username}`);
-    io.emit("alert_message", `${socket.username} has left the quiz.`);
-
-    // Supprimer le joueur déconnecté de la liste des joueurs connectés
-    connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);
-  });
-
-  socket.on("get_players", () => {
-    // Envoyer la liste des joueurs connectés à tous les clients
-    io.emit("players", connectedPlayers.map((player) => player.username));
-  });
-});
-
 
   httpServer
     .once("error", (err) => {
