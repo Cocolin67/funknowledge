@@ -1,6 +1,9 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url"; // Import nécessaire pour utiliser import.meta.url
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -8,59 +11,99 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+// Configuration pour obtenir __dirname avec import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
-
   const io = new Server(httpServer);
 
-  const questions = [
-    {
-      question: "Quelle est la capitale de la France ?",
-      answer: "Paris",
-    },
-    {
-      question: "Quelle est la plus grande planète de notre système solaire ?",
-      answer: "Jupiter",
-    },
-    {
-      question: "Combien y a-t-il de continents ?",
-      answer: "7",
-    },
-  ];
-
   let connectedPlayers = [];
-  let quizStarted = false; // Déclaration à l'extérieur du gestionnaire de connexion
-  let currentQuestion = null;
-  let answerTimeout = null; // Pour gérer le temps limite pour les réponses
+  let quizStarted = false;
+
+  // Charger les questions depuis le fichier JSON
+  const questionsPath = path.join(__dirname, "src", "data", "questions.json");
+  let questionsData = {};
+  let randomQuestion = {};
+
+  // Lire les questions au démarrage du serveur
+  try {
+    const data = fs.readFileSync(questionsPath, "utf-8");
+    questionsData = JSON.parse(data);
+  } catch (err) {
+    console.error("Erreur lors du chargement des questions:", err);
+  }
 
   function startQuiz(socket) {
     console.log("Starting quiz...");
-    io.emit("server_message", "Démarrage du quiz...");
+    io.emit("toast_message", "Le quiz commence...");
     io.emit("quiz_started", true);
 
-    // Commencer le quiz après un court délai
+    let questionTimer; // Timer pour chaque question
+
+    // Fonction pour envoyer une question
+    function sendQuestion() {
+      // Choisir une catégorie aléatoire et une question dans cette catégorie
+      const categories = Object.keys(questionsData);
+      const randomCategory =
+        categories[Math.floor(Math.random() * categories.length)];
+      randomQuestion =
+        questionsData[randomCategory][
+          Math.floor(Math.random() * questionsData[randomCategory].length)
+        ];
+
+      // Envoyer la question au client
+      io.emit("quiz_question", randomQuestion.question);
+      socket.currentQuestion = randomQuestion; // Sauvegarder la question actuelle pour vérification
+
+      // Démarrer le timer pour la question (ex: 15 secondes pour répondre)
+      questionTimer = setTimeout(() => {
+        io.emit(
+          "toast_message",
+          `Temps écoulé ! La bonne réponse était : ${socket.currentQuestion.answer}.`
+        );
+        endQuiz(); // Appeler la fonction pour arrêter le quiz
+      }, 16000); // Le timer est réglé à 15 secondes (ajuste cette durée selon tes besoins)
+    }
+
+    // Fonction pour terminer le quiz
+    function endQuiz(retry) {
+      clearTimeout(questionTimer); // Annuler le timer actuel
+      quizStarted = false; // Réinitialise le statut du quiz
+      io.emit("quiz_question", ""); // Effacer la question affichée
+      if (retry === false) return; // Retournez pour relancer une question
+      io.emit("quiz_started", false);
+    }
+
+    // Démarre le quiz en envoyant la première question
     setTimeout(() => {
-      askQuestion(socket);
+      sendQuestion();
     }, 5000);
-  }
 
-  function askQuestion(socket) {
-    // Sélectionner une question au hasard
-    currentQuestion = questions[Math.floor(Math.random() * questions.length)];
-    io.emit("quiz_question", currentQuestion.question);
+    // Écouter les réponses des joueurs, mais uniquement pour les nouvelles connexions
+    if (!socket.hasListener) {
+      socket.on("message", (data) => {
+        // Vérifier si la réponse est correcte
+        if (
+          socket.currentQuestion &&
+          socket.currentQuestion.answer.toLowerCase() === data.toLowerCase()
+        ) {
+          clearTimeout(questionTimer); // Annuler le timer lorsque la bonne réponse est donnée
+          io.emit(
+            "toast_message",
+            `Bravo ${socket.username} ! La réponse est correcte.`
+          );
+          endQuiz(false);
 
-    // Délai pour recevoir la réponse (par exemple, 15 secondes)
-    answerTimeout = setTimeout(() => {
-      io.emit("server_message", "Temps écoulé ! Aucune bonne réponse reçu.");
-      endQuiz(); // Optionnel : Terminer le quiz ou demander la question suivante
-    }, 16000); // Temps limite de 15 secondes ++ une extra seconde pour laisser le temps de répondre
-  }
-
-  function endQuiz() {
-    io.emit("quiz_started", false);
-    quizStarted = false; // Réinitialiser l'état du quiz pour permettre un nouveau quiz
-    currentQuestion = null; // Réinitialiser la question actuelle
-    if (answerTimeout) clearTimeout(answerTimeout); // Annuler tout timeout restant
+          // Envoie une nouvelle question après une bonne réponse
+          setTimeout(() => {
+            sendQuestion();
+          }, 10000);
+        }
+      });
+      socket.hasListener = true; // Marquer que le listener a été ajouté pour ce socket
+    }
   }
 
   io.on("connection", (socket) => {
@@ -76,20 +119,15 @@ app.prepare().then(() => {
       connectedPlayers.push(player);
 
       // Envoyer la liste des joueurs connectés à tous les clients
-      io.emit("players", connectedPlayers.map((player) => player.username));
+      io.emit(
+        "players",
+        connectedPlayers.map((player) => player.username)
+      );
     });
 
     socket.on("message", (data) => {
-      // Handle incoming message
-      console.log("Received message:", data);
-      io.emit("message", socket.username + " : " + data);
-
-      // Vérification de la réponse pendant le quiz
-      if (quizStarted && currentQuestion && currentQuestion.answer.toLowerCase() === data.toLowerCase()) {
-        io.emit("server_message", `Bien joué ${socket.username}, bonne réponse !`);
-        clearTimeout(answerTimeout); // Annuler le timeout si la réponse correcte est donnée
-        endQuiz(); // Terminer le quiz ou demander la question suivante
-      }
+      console.log("Message reçu:", data);
+      io.emit("message", `${socket.username} : ${data}`);
     });
 
     socket.on("start_quiz", () => {
@@ -101,15 +139,23 @@ app.prepare().then(() => {
 
     socket.on("get_players", () => {
       // Envoyer la liste des joueurs connectés à tous les clients
-      io.emit("players", connectedPlayers.map((player) => player.username));
+      io.emit(
+        "players",
+        connectedPlayers.map((player) => player.username)
+      );
     });
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.username}`);
 
       // Supprimer le joueur déconnecté de la liste des joueurs connectés
-      connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);
-      io.emit("players", connectedPlayers.map((player) => player.username));
+      connectedPlayers = connectedPlayers.filter(
+        (player) => player.id !== socket.id
+      );
+      io.emit(
+        "players",
+        connectedPlayers.map((player) => player.username)
+      );
     });
   });
 

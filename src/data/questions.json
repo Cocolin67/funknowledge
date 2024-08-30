@@ -1,0 +1,32 @@
+{
+  "geographie": [
+    {
+      "question": "Quelle est la capitale de la France ?",
+      "answer": "Paris"
+    },
+    {
+      "question": "Quel est le plus long fleuve du monde ?",
+      "answer": "Nil"
+    }
+  ],
+  "science": [
+    {
+      "question": "Quelle planète est connue sous le nom de Planète Rouge ?",
+      "answer": "Mars"
+    },
+    {
+      "question": "Quel est le symbole chimique de l'eau ?",
+      "answer": "H2O"
+    }
+  ],
+  "histoire": [
+    {
+      "question": "Qui a été le premier président des États-Unis ?",
+      "answer": "George Washington"
+    },
+    {
+      "question": "En quelle année la Seconde Guerre mondiale s'est-elle terminée ?",
+      "answer": "1945"
+    }
+  ]
+}

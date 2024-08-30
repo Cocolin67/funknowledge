@@ -17,6 +17,7 @@ import QuizInterface from "@/components/QuizInterface";
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
   const [server_message, setServer_message] = useState("");
+  const [toast_message, setToast_message] = useState("");
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
 
@@ -32,17 +33,23 @@ export default function Home() {
     }
 
     function onServerMessageReceived(message) {
+      console.log(message);
+    }
+
+    function onToastMessageReceived(message) {
       toast(message);
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("server_message", onServerMessageReceived);
+    socket.on("toast_message", onToastMessageReceived);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("server_message", onServerMessageReceived);
+      socket.off("toast_message", onToastMessageReceived);
     };
   }, []);
 
