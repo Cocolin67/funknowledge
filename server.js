@@ -82,7 +82,6 @@ app.prepare().then(() => {
     }, 5000);
 
     // Écouter les réponses des joueurs, mais uniquement pour les nouvelles connexions
-    if (!socket.hasListener) {
       socket.on("message", (data) => {
         // Vérifier si la réponse est correcte
         if (
@@ -102,8 +101,6 @@ app.prepare().then(() => {
           }, 10000);
         }
       });
-      socket.hasListener = true; // Marquer que le listener a été ajouté pour ce socket
-    }
   }
 
   io.on("connection", (socket) => {
