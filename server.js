@@ -3,7 +3,7 @@ import next from "next";
 import { Server } from "socket.io";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url"; // Import nécessaire pour utiliser import.meta.url
+import { fileURLToPath } from "url";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -21,11 +21,13 @@ app.prepare().then(() => {
 
   let connectedPlayers = [];
   let quizStarted = false;
+  let questionTimer; // Timer global pour chaque question
+  let randomQuestion = {}; // Question courante
+  let currentAnswers = {}; // Réponses des joueurs
 
   // Charger les questions depuis le fichier JSON
   const questionsPath = path.join(__dirname, "src", "data", "questions.json");
   let questionsData = {};
-  let randomQuestion = {};
 
   // Lire les questions au démarrage du serveur
   try {
@@ -35,72 +37,42 @@ app.prepare().then(() => {
     console.error("Erreur lors du chargement des questions:", err);
   }
 
-  function startQuiz(socket) {
+  function startQuiz() {
     console.log("Starting quiz...");
     io.emit("toast_message", "Le quiz commence...");
     io.emit("quiz_started", true);
-
-    let questionTimer; // Timer pour chaque question
 
     // Fonction pour envoyer une question
     function sendQuestion() {
       // Choisir une catégorie aléatoire et une question dans cette catégorie
       const categories = Object.keys(questionsData);
-      const randomCategory =
-        categories[Math.floor(Math.random() * categories.length)];
-      randomQuestion =
-        questionsData[randomCategory][
-          Math.floor(Math.random() * questionsData[randomCategory].length)
-        ];
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      randomQuestion = questionsData[randomCategory][Math.floor(Math.random() * questionsData[randomCategory].length)];
 
       // Envoyer la question au client
       io.emit("quiz_question", randomQuestion.question);
-      socket.currentQuestion = randomQuestion; // Sauvegarder la question actuelle pour vérification
 
       // Démarrer le timer pour la question (ex: 15 secondes pour répondre)
       questionTimer = setTimeout(() => {
-        io.emit(
-          "toast_message",
-          `Temps écoulé ! La bonne réponse était : ${socket.currentQuestion.answer}.`
-        );
+        io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}.`);
         endQuiz(); // Appeler la fonction pour arrêter le quiz
       }, 16000); // Le timer est réglé à 15 secondes (ajuste cette durée selon tes besoins)
-    }
-
-    // Fonction pour terminer le quiz
-    function endQuiz(retry) {
-      clearTimeout(questionTimer); // Annuler le timer actuel
-      quizStarted = false; // Réinitialise le statut du quiz
-      io.emit("quiz_question", ""); // Effacer la question affichée
-      if (retry === false) return; // Retournez pour relancer une question
-      io.emit("quiz_started", false);
     }
 
     // Démarre le quiz en envoyant la première question
     setTimeout(() => {
       sendQuestion();
     }, 5000);
+  }
 
-    // Écouter les réponses des joueurs, mais uniquement pour les nouvelles connexions
-      socket.on("message", (data) => {
-        // Vérifier si la réponse est correcte
-        if (
-          socket.currentQuestion &&
-          socket.currentQuestion.answer.toLowerCase() === data.toLowerCase()
-        ) {
-          clearTimeout(questionTimer); // Annuler le timer lorsque la bonne réponse est donnée
-          io.emit(
-            "toast_message",
-            `Bravo ${socket.username} ! La réponse est correcte.`
-          );
-          endQuiz(false);
-
-          // Envoie une nouvelle question après une bonne réponse
-          setTimeout(() => {
-            sendQuestion();
-          }, 10000);
-        }
-      });
+    // Fonction pour terminer le quiz
+  function endQuiz(retry) {
+    clearTimeout(questionTimer); // Annuler le timer actuel
+    quizStarted = false; // Réinitialise le statut du quiz
+    io.emit("quiz_question", ""); // Effacer la question affichée
+    if (retry === false) return; // Retournez pour relancer une question
+    io.emit("quiz_started", false);
+    currentAnswers = {}; // Réinitialiser les réponses des joueurs
   }
 
   io.on("connection", (socket) => {
@@ -116,43 +88,52 @@ app.prepare().then(() => {
       connectedPlayers.push(player);
 
       // Envoyer la liste des joueurs connectés à tous les clients
-      io.emit(
-        "players",
-        connectedPlayers.map((player) => player.username)
-      );
+      io.emit("players", connectedPlayers.map((player) => player.username));
+      io.emit("quiz_started", quizStarted);
+      io.emit("quiz_question", randomQuestion.question);
     });
 
     socket.on("message", (data) => {
-      console.log("Message reçu:", data);
-      io.emit("message", `${socket.username} : ${data}`);
+      if (quizStarted) {
+        // Vérifier si la réponse est correcte
+        if (randomQuestion && randomQuestion.answer.toLowerCase() === data.toLowerCase()) {
+          io.emit("toast_message", `Bravo ${socket.username} ! La réponse est correcte.`);
+          endQuiz(false);
+
+          // Envoie une nouvelle question après une bonne réponse
+          setTimeout(() => {
+            startQuiz();
+          }, 10000);
+        } else {
+          // Stocker les réponses des joueurs pour traitement ultérieur
+          if (!currentAnswers[socket.id]) {
+            currentAnswers[socket.id] = data;
+          }
+        }
+      }
+        
+      io.emit("message", socket.username + " : " + data);
+      
     });
 
     socket.on("start_quiz", () => {
       if (!quizStarted) {
         quizStarted = true;
-        startQuiz(socket);
+        startQuiz();
       }
     });
 
     socket.on("get_players", () => {
       // Envoyer la liste des joueurs connectés à tous les clients
-      io.emit(
-        "players",
-        connectedPlayers.map((player) => player.username)
-      );
+      io.emit("players", connectedPlayers.map((player) => player.username));
     });
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.username}`);
 
       // Supprimer le joueur déconnecté de la liste des joueurs connectés
-      connectedPlayers = connectedPlayers.filter(
-        (player) => player.id !== socket.id
-      );
-      io.emit(
-        "players",
-        connectedPlayers.map((player) => player.username)
-      );
+      connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);
+      io.emit("players", connectedPlayers.map((player) => player.username));
     });
   });
 
