@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 // Système de notification
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 // Système de multijoueur
 import { socket } from "../socket";
 
