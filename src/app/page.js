@@ -14,13 +14,13 @@ import { socket } from "../socket";
 import PlayerList from "../components/PlayerList";
 import Chat from "../components/Chat";
 import QuizInterface from "@/components/QuizInterface";
+import { QuizProvider } from "../context/QuizContext"; // Import du contexte
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
-  const [server_message, setServer_message] = useState("");
-  const [toast_message, setToast_message] = useState("");
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const [roomNumber, setRoomNumber] = useState("");
 
   useEffect(() => {
     function onConnect() {
@@ -41,16 +41,22 @@ export default function Home() {
       toast(message);
     }
 
+    function onToastWarningReceived(message) {
+      toast.warn(message);
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("server_message", onServerMessageReceived);
     socket.on("toast_message", onToastMessageReceived);
+    socket.on("toast_warning", onToastWarningReceived);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("server_message", onServerMessageReceived);
       socket.off("toast_message", onToastMessageReceived);
+      socket.off("toast_warning", onToastWarningReceived);
     };
   }, []);
 
@@ -58,6 +64,16 @@ export default function Home() {
     e.preventDefault();
     if (username.trim()) {
       socket.emit("join", username);
+      console.log("User connected:", username);
+      setUsername(username);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handlePrivateRoom = () => {
+    if (username.trim()) {
+      toast.warn("Le salon privé a été créé !");
+      socket.emit("join_private_room", username);
       console.log("User connected:", username);
       setIsModalOpen(false);
     }
@@ -68,6 +84,7 @@ export default function Home() {
       <ToastContainer 
         theme="dark"
       />
+      <QuizProvider>
       <main className="flex flex-col h-full">
         <h1 className="text-4xl text-center font-bold p-4">
           FunKnowledge
@@ -87,11 +104,17 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white rounded p-2 w-full"
+                  className="bg-green-500 text-white rounded p-2 w-full"
                 >
                   Rejoindre
                 </button>
               </form>
+              <button
+                onClick={handlePrivateRoom}
+                className="bg-blue-500 text-white rounded p-2 py-1 my-2 w-full"
+              >
+                Créer un salon privé
+              </button>
             </div>
           </div>
         )}
@@ -105,12 +128,13 @@ export default function Home() {
 
               <div className="flex flex-col w-2/3 h-full bg-gray-400 rounded-r shadow-lg overflow-hidden">
                 <QuizInterface />
-                <Chat />
+                <Chat username={username}/>
               </div>
             </>
           )}
         </section>
       </main>
+      </QuizProvider>
     </div>
   );
 }

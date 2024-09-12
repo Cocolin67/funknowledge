@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { socket } from "../socket";
 
+import { useQuiz } from "../context/QuizContext"; // Utiliser le contexte
+
 const QuizInterface = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizQuestion, setQuizQuestion] = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
   const [timeLimit, setTimeLimit] = useState(15); // Temps limite en secondes
+
+  const { startTimer } = useQuiz();
 
   const handleStartQuiz = () => {
     socket.emit("start_quiz");
@@ -25,6 +29,7 @@ const QuizInterface = () => {
 
     const handleQuizQuestion = (question) => {
       clearInterval(timer);
+      startTimer();
       setQuizQuestion(question);
       setTimeLeft(timeLimit); // Réinitialiser le temps restant au début du quiz
     };
@@ -45,7 +50,7 @@ const QuizInterface = () => {
       socket.off("quiz_started", handleQuizStarted);
       socket.off("quiz_question", handleQuizQuestion);
     };
-  }, [quizStarted, timeLeft, timeLimit]);
+  }, [quizStarted, timeLeft, timeLimit, startTimer]);
 
   const progress = ((timeLeft / timeLimit) * 100).toFixed(0);
 

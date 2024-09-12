@@ -5,6 +5,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { stringSimilarity } from "string-similarity-js";
+
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000;
@@ -41,6 +43,7 @@ app.prepare().then(() => {
     console.log("Starting quiz...");
     io.emit("toast_message", "Le quiz commence...");
     io.emit("quiz_started", true);
+    io.emit("quiz_question", "");
 
     // Fonction pour envoyer une question
     function sendQuestion() {
@@ -68,9 +71,9 @@ app.prepare().then(() => {
     // Fonction pour terminer le quiz
   function endQuiz(retry) {
     clearTimeout(questionTimer); // Annuler le timer actuel
-    quizStarted = false; // Réinitialise le statut du quiz
     io.emit("quiz_question", ""); // Effacer la question affichée
     if (retry === false) return; // Retournez pour relancer une question
+    quizStarted = false; // Réinitialise le statut du quiz
     io.emit("quiz_started", false);
     currentAnswers = {}; // Réinitialiser les réponses des joueurs
   }
@@ -93,27 +96,55 @@ app.prepare().then(() => {
       io.emit("quiz_question", randomQuestion.question);
     });
 
+    socket.on("join_private_room", (username) => {
+      function randomroomnumber() {
+        return Math.floor(Math.random() * 1000);
+      }
+
+      const room = randomroomnumber();
+      socket.join(room);
+      
+      socket.username = username;
+
+      console.log(`User connected to private room: ${username}`);
+
+      // Ajouter le joueur connecté à la liste des joueurs connectés
+      const player = { id: socket.id, username };
+      connectedPlayers.push(player);
+
+      // Envoyer la liste des joueurs connectés à tous les clients
+      io.emit("players", connectedPlayers.map((player) => player.username));
+      io.emit("quiz_started", quizStarted);
+      io.emit("quiz_question", randomQuestion.question);
+    });
+
     socket.on("message", (data) => {
+        
+      io.emit("message", socket.username + " : " + data);
+      
+    });
+
+    socket.on("user_response", (data) => {
+      //do var_dump of data
+      console.log(data);
+      let similarity = stringSimilarity(data.response, randomQuestion.answer);
+      console.log("Précision : " + similarity);
+
       if (quizStarted) {
-        // Vérifier si la réponse est correcte
-        if (randomQuestion && randomQuestion.answer.toLowerCase() === data.toLowerCase()) {
-          io.emit("toast_message", `Bravo ${socket.username} ! La réponse est correcte.`);
+        if (similarity >= 0.9) {
+          io.emit("toast_message", `Bravo ${socket.username} ! La réponse est correcte. (Temps de réponse : ${data.timeTaken} secondes)`);
           endQuiz(false);
 
           // Envoie une nouvelle question après une bonne réponse
           setTimeout(() => {
             startQuiz();
           }, 10000);
+        } else if (similarity >= 0.8) {
+          socket.emit("toast_warning", `Presque ${socket.username} ! La réponse est presque correcte.`);
         } else {
-          // Stocker les réponses des joueurs pour traitement ultérieur
-          if (!currentAnswers[socket.id]) {
-            currentAnswers[socket.id] = data;
-          }
+          socket.emit("toast_warning", `NOn`);
         }
       }
-        
-      io.emit("message", socket.username + " : " + data);
-      
     });
 
     socket.on("start_quiz", () => {
