@@ -15,6 +15,7 @@ import PlayerList from "../components/PlayerList";
 import Chat from "../components/Chat";
 import QuizInterface from "@/components/QuizInterface";
 import { QuizProvider } from "../context/QuizContext"; // Import du contexte
+import Leaderboard from "@/components/Leaderboard";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
@@ -123,7 +124,12 @@ export default function Home() {
           {!isModalOpen && (
             <>
               <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">
-                <PlayerList />
+                <div className="h-1/2">
+                  <PlayerList />
+                </div>
+                <div className="h-1/2">
+                  <Leaderboard />
+                </div>
               </div>
 
               <div className="flex flex-col w-2/3 h-full bg-gray-400 rounded-r shadow-lg overflow-hidden">
