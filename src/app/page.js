@@ -17,11 +17,36 @@ import QuizInterface from "@/components/QuizInterface";
 import { QuizProvider } from "../context/QuizContext"; // Import du contexte
 import Leaderboard from "@/components/Leaderboard";
 
+//Github API
+import { Octokit } from "@octokit/core";
+
+//Icones
+import { CodeSlash } from 'react-bootstrap-icons';
+
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [roomNumber, setRoomNumber] = useState("");
+  const [repoInfo, setRepoInfo] = useState(null);
+
+  useEffect(() => {
+    const fetchRepoInfo = async () => {
+      try {
+        const octokit = new Octokit();
+        const response = await octokit.request('GET /repos/{owner}/{repo}/releases', {
+          owner: 'Cocolin67',
+          repo: 'funknowledge',
+        });
+        setRepoInfo(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching repo info:', error);
+      }
+    };
+
+    fetchRepoInfo();
+  }, []); 
 
   useEffect(() => {
     function onConnect() {
@@ -146,6 +171,31 @@ export default function Home() {
             </>
           )}
         </section>
+        <footer className="text-center text-gray-500 p-4">
+          <p className="inline-flex items-center space-x-2">
+            <a
+              className="hover:underline hover:text-white transition-colors"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfuQYAV30ZQ9bYJu0oXgVj5vsthfGX0aNUgeMi-ZzPhfnXJcg/viewform?usp=sf_link"
+            >
+              Proposer des questions
+            </a>
+            <span>/</span>
+            {repoInfo ? (
+              <a
+                href={repoInfo[0]?.html_url} // Assurez-vous que cette propriété contient l'URL de la release
+                className="flex items-center space-x-1 hover:underline hover:text-white transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CodeSlash />
+                <span>{repoInfo[0]?.name}</span>
+              </a>
+            ) : (
+              <span>Chargement...</span>
+            )}
+          </p>
+          <p>Tout droits réservés - Colin AUBERT - FunKnowledge 2024</p>
+        </footer>
       </main>
       </QuizProvider>
     </div>
