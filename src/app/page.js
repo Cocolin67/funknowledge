@@ -152,7 +152,7 @@ export default function Home() {
           </div>
         )}
 
-        <section className="p-5 px-20 flex justify-center items-center h-[85%]">
+        <section className="p-5 px-20 flex justify-center items-center h-[80%]">
           {!isModalOpen && (
             <>
               <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">

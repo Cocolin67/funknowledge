@@ -139,20 +139,12 @@ app.prepare().then(() => {
     });
 
     socket.on("message", (data) => {    
-      //let similarity = stringSimilarity(data.response, randomQuestion.answer);
+      if (!socket.username) {
+        socket.emit("toast_error", "Erreur : pseudo manquant. Veuillez rejoindre à nouveau.");
+        return;
+      }
       
-      /*
-      if (quizStarted) {
-        if (similarity >= 0.9) {
-          //don't emit message
-        } else {
-          io.emit("message", socket.username + " : " + data);
-        }
-      } else {
-        io.emit("message", socket.username + " : " + data);
-      }*/
-
-      //io.emit("message", socket.username + " : " + data);
+      io.emit("message", socket.username + " : " + data);
     });
 
     socket.on("user_response", (data) => {

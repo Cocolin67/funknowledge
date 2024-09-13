@@ -148,12 +148,15 @@ const QuizInterface = () => {
           )}
         </div>
       ) : (
+        <>
+        <p className="text-2xl">Le plus rapide l&apos;emporte !</p>
         <button
           onClick={handleStartQuiz}
           className="bg-blue-500 text-white rounded p-4 px-10 m-auto text-2xl font-bold drop-shadow-lg"
         >
           Commencer le quiz
         </button>
+        </>
       )}
     </div>
   );

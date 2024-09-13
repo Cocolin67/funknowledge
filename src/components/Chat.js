@@ -46,7 +46,6 @@ const Chat = ({ username }) => {
 
   const handleMessage = (message) => {
     if (message.trim() !== "") {
-      socket.emit("message", message);
       return message; // Retourne le message pour l'utiliser dans handleUserResponse
     }
     return null; // Retourne null si le message est vide ou invalide
@@ -70,11 +69,14 @@ const Chat = ({ username }) => {
         `Tentative de réponse envoyée : ${timeTaken} secondes par ${username}`
       );
       e.target.value = ""; // Reset the input after sending
+    } else {
+      socket.emit("message", answer);
+      e.target.value = "";
     }
   };
 
   return (
-    <div className="flex flex-col h-1/2 bg-gray-500">
+    <div className="flex flex-col h-1/2 bg-gray-700">
       <div className="flex-grow overflow-y-auto">
         {messages.map((message) => (
           <div
