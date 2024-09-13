@@ -156,10 +156,10 @@ export default function Home() {
           {!isModalOpen && (
             <>
               <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">
-                <div className="h-1/2 overflow-scroll">
+                <div className="h-1/2 overflow-auto">
                   <PlayerList />
                 </div>
-                <div className="h-1/2 overflow-scroll">
+                <div className="h-1/2 overflow-auto">
                   <Leaderboard />
                 </div>
               </div>
@@ -174,6 +174,7 @@ export default function Home() {
         <footer className="text-center text-gray-500 p-4">
           <p className="inline-flex items-center space-x-2">
             <a
+              target="_blank"
               className="hover:underline hover:text-white transition-colors"
               href="https://docs.google.com/forms/d/e/1FAIpQLSfuQYAV30ZQ9bYJu0oXgVj5vsthfGX0aNUgeMi-ZzPhfnXJcg/viewform?usp=sf_link"
             >
