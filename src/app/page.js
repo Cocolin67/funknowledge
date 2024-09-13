@@ -46,11 +46,16 @@ export default function Home() {
       toast.warn(message);
     }
 
+    function onToastErrorReceived(message) {
+      toast.error(message);
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("server_message", onServerMessageReceived);
     socket.on("toast_message", onToastMessageReceived);
     socket.on("toast_warning", onToastWarningReceived);
+    socket.on("toast_error", onToastErrorReceived);
 
     return () => {
       socket.off("connect", onConnect);
@@ -58,6 +63,7 @@ export default function Home() {
       socket.off("server_message", onServerMessageReceived);
       socket.off("toast_message", onToastMessageReceived);
       socket.off("toast_warning", onToastWarningReceived);
+      socket.off("toast_error", onToastErrorReceived);
     };
   }, []);
 
@@ -86,7 +92,7 @@ export default function Home() {
         theme="dark"
       />
       <QuizProvider>
-      <main className="flex flex-col h-full">
+      <main className="flex flex-col h-full justify-center">
         <h1 className="text-4xl text-center font-bold p-4">
           FunKnowledge
         </h1>
@@ -111,8 +117,9 @@ export default function Home() {
                 </button>
               </form>
               <button
+                disabled={true}
                 onClick={handlePrivateRoom}
-                className="bg-blue-500 text-white rounded p-2 py-1 my-2 w-full"
+                className="bg-gray-500 text-white rounded p-2 py-1 my-2 w-full cursor-not-allowed"
               >
                 Créer un salon privé
               </button>
@@ -124,10 +131,10 @@ export default function Home() {
           {!isModalOpen && (
             <>
               <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">
-                <div className="h-1/2">
+                <div className="h-1/2 overflow-scroll">
                   <PlayerList />
                 </div>
-                <div className="h-1/2">
+                <div className="h-1/2 overflow-scroll">
                   <Leaderboard />
                 </div>
               </div>

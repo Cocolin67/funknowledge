@@ -176,6 +176,8 @@ app.prepare().then(() => {
         } else {
           io.emit("message", socket.username + " : " + data.response);
         }
+      } else {
+        io.emit("message", socket.username + " : " + data.response);
       }
     });
 
