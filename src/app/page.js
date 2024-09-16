@@ -118,9 +118,10 @@ export default function Home() {
       />
       <QuizProvider>
       <main className="flex flex-col h-full justify-center">
-        <h1 className="text-4xl text-center font-bold p-4">
+        <h1 className="text-4xl text-center font-bold pt-4">
           FunKnowledge
         </h1>
+        <p className="text-xl text-center font-light">Le plus rapide l&apos;emporte !</p>
 
         {isModalOpen && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
@@ -138,7 +139,7 @@ export default function Home() {
                   type="submit"
                   className="bg-green-500 text-white rounded p-2 w-full"
                 >
-                  Rejoindre
+                  Rejoindre le salon publique
                 </button>
               </form>
               <button

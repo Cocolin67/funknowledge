@@ -131,7 +131,7 @@ const QuizInterface = () => {
       <Particles id="tsparticles" options={options1} className="h-full w-full absolute" />
       {quizStarted ? (
         <div className="text-center">
-          <h2 className="text-3xl font-bold m-auto mb-4">{quizQuestion}</h2>
+          <h2 className="text-3xl font-bold m-auto mb-4 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">{quizQuestion}</h2>
           {quizQuestion !== "" && (
           <>
           <div className="w-full bg-gray-300 rounded-full h-4 mb-4">
@@ -149,12 +149,11 @@ const QuizInterface = () => {
         </div>
       ) : (
         <>
-        <p className="text-2xl">Le plus rapide l&apos;emporte !</p>
         <button
-          onClick={handleStartQuiz}
-          className="bg-blue-500 text-white rounded p-4 px-10 m-auto text-2xl font-bold drop-shadow-lg"
+          disabled={true}
+          className="bg-gray-500 text-white rounded p-4 px-10 m-auto text-2xl font-bold drop-shadow-lg"
         >
-          Commencer le quiz
+          En attente de joueurs...
         </button>
         </>
       )}

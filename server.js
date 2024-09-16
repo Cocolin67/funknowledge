@@ -53,7 +53,8 @@ app.prepare().then(() => {
         if (Object.keys(currentAnswers).length === 0) {
           // Personne n'a répondu
           io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}. Personne n'a répondu.`);
-          endQuiz(); // Terminer le quiz sans redémarrer
+          endQuiz(false);
+          startQuiz();
         } else {
           // Calculer le classement seulement si des réponses existent
           io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}.`);
@@ -133,6 +134,13 @@ app.prepare().then(() => {
       connectedPlayers.push(player);
       playerScores[socket.id] = playerScores[socket.id] || 0;
 
+      if (connectedPlayers.length >= 2) {
+        if (!quizStarted) {
+          quizStarted = true;
+          startQuiz();
+        }
+      }
+
       io.emit("players", connectedPlayers.map((player) => player.username));
       socket.emit("quiz_started", quizStarted);
       socket.emit("quiz_question", randomQuestion.question);
@@ -183,6 +191,13 @@ app.prepare().then(() => {
     socket.on("disconnect", () => {
       connectedPlayers = connectedPlayers.filter((player) => player.id !== socket.id);
       io.emit("players", connectedPlayers.map((player) => player.username));
+
+      if (connectedPlayers.length <= 1) {
+        if (quizStarted) {
+          quizStarted = false;
+          endQuiz();
+        }
+      }
     });
   });
 
