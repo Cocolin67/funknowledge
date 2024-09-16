@@ -121,8 +121,6 @@ app.prepare().then(() => {
 
 
   io.on("connection", (socket) => {
-    console.log("New client connected");
-
     socket.on("join", (username) => {
       if (!username) {
         socket.emit("toast_error", "Le pseudo est requis pour rejoindre le jeu.");
@@ -133,6 +131,9 @@ app.prepare().then(() => {
       const player = { id: socket.id, username };
       connectedPlayers.push(player);
       playerScores[socket.id] = playerScores[socket.id] || 0;
+
+      console.log(`Joueur connecté : ${username}`);
+      socket.emit("authentified", true);
 
       if (connectedPlayers.length >= 2) {
         if (!quizStarted) {

@@ -25,6 +25,7 @@ import { CodeSlash } from 'react-bootstrap-icons';
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
+  const [isAuthentified, setIsAuthentified] = useState(false);
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [roomNumber, setRoomNumber] = useState("");
@@ -51,12 +52,16 @@ export default function Home() {
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
-      toast.success("Connecté au serveur !");
     }
 
     function onDisconnect() {
       setIsConnected(false);
       toast.error("Déconnecté du serveur..."); // Test pour afficher une notification d'erreur
+    }
+
+    function onAuthentified() {
+      toast.success("Authentification réussie !");
+      setIsAuthentified(true);
     }
 
     function onServerMessageReceived(message) {
@@ -77,6 +82,7 @@ export default function Home() {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("authentified", onAuthentified);
     socket.on("server_message", onServerMessageReceived);
     socket.on("toast_message", onToastMessageReceived);
     socket.on("toast_warning", onToastWarningReceived);
@@ -85,6 +91,7 @@ export default function Home() {
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("authentified", onAuthentified);
       socket.off("server_message", onServerMessageReceived);
       socket.off("toast_message", onToastMessageReceived);
       socket.off("toast_warning", onToastWarningReceived);
@@ -156,6 +163,17 @@ export default function Home() {
         <section className="p-5 px-20 flex justify-center items-center h-[80%]">
           {!isModalOpen && (
             <>
+            {!isAuthentified && (
+            <>
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+              <div className="bg-white p-6 rounded shadow-lg">
+                <h2 className="text-xl font-bold mb-4 text-black">Identification en cours...</h2>
+              </div>
+            </div>
+            </>
+            )}
+            {isAuthentified && (
+            <>
               <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">
                 <div className="h-1/2 overflow-auto">
                   <PlayerList />
@@ -169,6 +187,8 @@ export default function Home() {
                 <QuizInterface />
                 <Chat username={username}/>
               </div>
+            </>
+            )}
             </>
           )}
         </section>
