@@ -124,11 +124,13 @@ export default function Home() {
         theme="dark"
       />
       <QuizProvider>
-      <main className="flex flex-col h-full justify-center">
-        <h1 className="text-4xl text-center font-bold pt-4">
-          FunKnowledge
-        </h1>
-        <p className="text-xl text-center font-light">Le plus rapide l&apos;emporte !</p>
+      <main className="flex flex-col h-full justify-evenly">
+        <header>
+          <h1 className="text-4xl text-center font-bold pt-4">
+            FunKnowledge
+          </h1>
+          <p className="text-xl text-center font-light">Le plus rapide l&apos;emporte !</p>
+        </header>
 
         {isModalOpen && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
