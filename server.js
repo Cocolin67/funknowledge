@@ -9,7 +9,7 @@ import { start } from "node:repl";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
-const port = 3011;
+const port = 3010;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
