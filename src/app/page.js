@@ -134,7 +134,7 @@ export default function Home() {
 
         {isModalOpen && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-            <div className="bg-white p-6 rounded shadow-lg">
+            <div className="bg-white p-6 rounded shadow-lg m-5 md:m-0">
               <h2 className="text-xl font-bold mb-4 text-black">Entrez un nom d&apos;utilisateur</h2>
               <form onSubmit={handleUsernameSubmit}>
                 <input
@@ -162,7 +162,7 @@ export default function Home() {
           </div>
         )}
 
-        <section className="p-5 px-20 flex justify-center items-center h-[80%]">
+        <section className="p-5 px-5 lg:px-20 flex justify-center items-center h-[80%]">
           {!isModalOpen && (
             <>
             {!isAuthentified && (
@@ -176,16 +176,38 @@ export default function Home() {
             )}
             {isAuthentified && (
             <>
-              <div className="p-4 bg-gray-800 text-white rounded-l-lg shadow-lg h-full w-1/3">
-                <div className="h-1/2 overflow-auto">
+              <div id="leftdiv" className="p-4 bg-gray-800 text-white rounded-l shadow-lg h-full w-1/3 relative">
+                <div id="playerlist" className="h-1/2 overflow-auto">
                   <PlayerList />
                 </div>
-                <div className="h-1/2 overflow-auto">
+                <div id="leaderboard" className="h-1/2 overflow-auto">
                   <Leaderboard />
                 </div>
+
+                <button
+                  className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-20 md:hidden block"
+                  onClick={() => {
+                    const leftdiv = document.querySelector('#leftdiv');
+                    const playerlist = document.querySelector('#playerlist');
+                    const leaderboard = document.querySelector('#leaderboard');
+                    playerlist.classList.toggle('hidden');
+                    leaderboard.classList.toggle('hidden');
+                    leftdiv.classList.toggle('w-0');
+                    leftdiv.classList.toggle('p-4');
+
+                    const button = document.querySelector('#leftdiv button');
+                    if (leftdiv.classList.contains('w-0')) {
+                      button.innerHTML = '&gt;';
+                    } else {
+                      button.innerHTML = '&lt;';
+                    }
+                  }}
+                >
+                  &lt;
+                </button>
               </div>
 
-              <div className="flex flex-col w-2/3 h-full bg-gray-400 rounded-r shadow-lg overflow-hidden">
+              <div className="flex flex-col w-full md:w-2/3 h-full bg-gray-400 rounded-xl md:rounded-r shadow-lg overflow-hidden">
                 <QuizInterface />
                 <Chat username={username}/>
               </div>
@@ -194,7 +216,7 @@ export default function Home() {
             </>
           )}
         </section>
-        <footer className="text-center text-gray-500 p-4">
+        <footer className="text-center text-gray-500 p-4 text-xs">
           <p className="inline-flex items-center space-x-2">
             <a
               target="_blank"

@@ -38,8 +38,13 @@ app.prepare().then(() => {
     console.error("Erreur lors du chargement des questions:", err);
   }
 
+  function consoleLog(message, type = "info") {
+    const date = new Date();
+    const timestamp = date.toLocaleTimeString();
+    console.log(`[${timestamp}] [${type.toUpperCase()}] ${message}`);
+  }
+
   function startQuiz() {
-    console.log("Starting quiz...");
     io.emit("quiz_started", true);
     io.emit("quiz_question", "");
 
@@ -83,7 +88,7 @@ app.prepare().then(() => {
 
   function calculateLeaderboard() {
     if (Object.keys(currentAnswers).length === 0) {
-      console.log("Aucune réponse n'a été enregistrée, aucun point n'est attribué.");
+      consoleLog("Aucune réponse n'a été enregistrée, aucun point n'est attribué.");
       return; // Ne pas calculer le classement si aucune réponse
     }
 
@@ -96,7 +101,7 @@ app.prepare().then(() => {
       playerScores[answer.socketId] = (playerScores[answer.socketId] || 0) + Math.max(points, 1); // Minimum de 1 point
     });
 
-    console.log("Scores des joueurs :", playerScores);
+    consoleLog(`Scores des joueurs : ${JSON.stringify(playerScores)}`);
 
     // Nettoyer les scores pour les joueurs déconnectés
     const activePlayerIds = connectedPlayers.map((player) => player.id);
@@ -116,7 +121,7 @@ app.prepare().then(() => {
       .sort((a, b) => b.score - a.score);
 
     io.emit("leaderboard", leaderboard);
-    console.log("Classement actuel :", leaderboard);
+    consoleLog(`Classement actuel :${JSON.stringify(playerScores)}`);
   }
 
 
@@ -132,7 +137,7 @@ app.prepare().then(() => {
       connectedPlayers.push(player);
       playerScores[socket.id] = playerScores[socket.id] || 0;
 
-      console.log(`Joueur connecté : ${username}`);
+      consoleLog(`Joueur connecté : ${username}`);
       socket.emit("authentified", true);
 
       if (connectedPlayers.length >= 2) {
@@ -203,6 +208,6 @@ app.prepare().then(() => {
   });
 
   httpServer.listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
+    consoleLog(`> Ready on http://${hostname}:${port}`);
   });
 });
