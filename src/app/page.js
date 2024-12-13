@@ -30,6 +30,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [roomNumber, setRoomNumber] = useState("");
   const [repoInfo, setRepoInfo] = useState(null);
+  const [quizStarted, setQuizStarted] = useState(false);
 
   useEffect(() => {
     const fetchRepoInfo = async () => {
@@ -80,6 +81,10 @@ export default function Home() {
       toast.error(message);
     }
 
+    const handleQuizStarted = (started) => {
+      setQuizStarted(started);
+    };
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("authentified", onAuthentified);
@@ -87,6 +92,7 @@ export default function Home() {
     socket.on("toast_message", onToastMessageReceived);
     socket.on("toast_warning", onToastWarningReceived);
     socket.on("toast_error", onToastErrorReceived);
+    socket.on("quiz_started", handleQuizStarted);
 
     return () => {
       socket.off("connect", onConnect);
@@ -96,6 +102,7 @@ export default function Home() {
       socket.off("toast_message", onToastMessageReceived);
       socket.off("toast_warning", onToastWarningReceived);
       socket.off("toast_error", onToastErrorReceived);
+      socket.off("quiz_started", handleQuizStarted);
     };
   }, []);
 
@@ -122,6 +129,7 @@ export default function Home() {
     <div className="h-screen bg-gray-900 text-white">
       <ToastContainer 
         theme="dark"
+        pauseOnFocusLoss={false}
       />
       <QuizProvider>
       <main className="flex flex-col h-full justify-evenly">
@@ -185,7 +193,7 @@ export default function Home() {
                 </div>
 
                 <button
-                  className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-20 md:hidden block"
+                  className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-20 block"
                   onClick={() => {
                     const leftdiv = document.querySelector('#leftdiv');
                     const playerlist = document.querySelector('#playerlist');
@@ -193,6 +201,7 @@ export default function Home() {
                     playerlist.classList.toggle('hidden');
                     leaderboard.classList.toggle('hidden');
                     leftdiv.classList.toggle('w-0');
+                    leftdiv.classList.toggle('w-1/3');
                     leftdiv.classList.toggle('p-4');
 
                     const button = document.querySelector('#leftdiv button');
@@ -207,8 +216,8 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="flex flex-col w-full md:w-2/3 h-full bg-gray-400 rounded-xl md:rounded-r shadow-lg overflow-hidden">
-                <QuizInterface />
+              <div className="flex flex-col w-full md:w-2/3 h-full bg-gray-400 rounded-r-xl md:rounded-r shadow-lg overflow-hidden">
+                <QuizInterface quizStarted={quizStarted} />
                 <Chat username={username}/>
               </div>
             </>
