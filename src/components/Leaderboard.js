@@ -20,7 +20,7 @@ const Leaderboard = () => {
 
 return (
     <div>
-        <h2 className="text-xl font-bold mb-4">Classement :</h2>
+        <h2 className="text-xl font-bold mb-4">Classement global :</h2>
         <ul className="space-y-2">
             {leaderboard.length > 0 ? (
                 leaderboard.map((player, index) => (

@@ -1,5 +1,5 @@
 {
-  "geographie": [
+  "Geographie": [
     {
       "question": "Quelle est la capitale de la France ?",
       "answer": "Paris"
@@ -7,9 +7,33 @@
     {
       "question": "Quel est le plus long fleuve du monde ?",
       "answer": "Nil"
+    },
+    {
+      "question": "Quel est le plus petit continent ?",
+      "answer": "Australie"
+    },
+    {
+      "question": "Dans quel pays se trouve la tour Eiffel ?",
+      "answer": "France"
+    },
+    {
+      "question": "Dans quel désert se trouve Las Vegas ?",
+      "answer": "Désert de Mojave"
+    },
+    {
+      "question": "Quel pays a le plus grand nombre d'îles ?",
+      "answer": "Suède"
+    },
+    {
+      "question": "Quelle est la plus grande île du monde ?",
+      "answer": "Groenland"
+    },
+    {
+      "question": "Quel est le pays le plus peuplé du monde ?",
+      "answer": "Chine"
     }
   ],
-  "science": [
+  "Science": [
     {
       "question": "Quelle planète est connue sous le nom de Planète Rouge ?",
       "answer": "Mars"
@@ -17,9 +41,33 @@
     {
       "question": "Quel est le symbole chimique de l'eau ?",
       "answer": "H2O"
+    },
+    {
+      "question": "Quel est le gaz que nous respirons ?",
+      "answer": "Oxygène"
+    },
+    {
+      "question": "Combien y a-t-il de jours dans une année bissextile ?",
+      "answer": "366"
+    },
+    {
+      "question": "Quel est l'organe responsable de la filtration du sang ?",
+      "answer": "Rein"
+    },
+    {
+      "question": "Quelle force fait tomber les objets au sol ?",
+      "answer": "Gravité"
+    },
+    {
+      "question": "Quel est l'élément chimique dont le symbole est 'O' ?",
+      "answer": "Oxygène"
+    },
+    {
+      "question": "Quel est l'organe responsable de la production d'insuline ?",
+      "answer": "Pancréas"
     }
   ],
-  "histoire": [
+  "Histoire": [
     {
       "question": "Qui a été le premier président des États-Unis ?",
       "answer": "George Washington"
@@ -27,6 +75,176 @@
     {
       "question": "En quelle année la Seconde Guerre mondiale s'est-elle terminée ?",
       "answer": "1945"
+    },
+    {
+      "question": "En quelle année Christophe Colomb a-t-il découvert l'Amérique ?",
+      "answer": "1492"
+    },
+    {
+      "question": "Qui était surnommé Napoléon le Petit ?",
+      "answer": "Napoléon III"
+    },
+    {
+      "question": "Quel empire était dirigé par Jules César ?",
+      "answer": "Empire Romain"
+    },
+    {
+      "question": "En quelle année la Révolution française a-t-elle commencé ?",
+      "answer": "1789"
+    },
+    {
+      "question": "Quel empire a été dirigé par Alexandre le Grand ?",
+      "answer": "Empire macédonien"
+    },
+    {
+      "question": "Qui a découvert la pénicilline ?",
+      "answer": "Alexander Fleming"
+    }
+  ],
+  "Sport": [
+    {
+      "question": "Combien de joueurs y a-t-il dans une équipe de football ?",
+      "answer": "11"
+    },
+    {
+      "question": "Quel pays a remporté la Coupe du Monde de football 2018 ?",
+      "answer": "France"
+    },
+    {
+      "question": "Dans quel sport utilise-t-on une raquette et un volant ?",
+      "answer": "Badminton"
+    },
+    {
+      "question": "Quelle course est connue sous le nom de 'La Grande Boucle' ?",
+      "answer": "Tour de France"
+    },
+    {
+      "question": "Quel sport est surnommé 'le roi des sports' ?",
+      "answer": "Football"
+    },
+    {
+      "question": "Quel joueur de tennis a remporté le plus de tournois du Grand Chelem ?",
+      "answer": "Novak Djokovic"
+    },
+    {
+      "question": "Quelle est la durée d'un match de football (en temps réglementaire) ?",
+      "answer": "90 minutes"
+    },
+    {
+      "question": "Qui détient le record du monde du 100 mètres en athlétisme ?",
+      "answer": "Usain Bolt"
+    }
+  ],
+  "Divertissement": [
+    {
+      "question": "Dans quel film peut-on entendre 'Je suis ton père' ?",
+      "answer": "Star Wars"
+    },
+    {
+      "question": "Quel super-héros est aussi connu sous le nom de Bruce Wayne ?",
+      "answer": "Batman"
+    },
+    {
+      "question": "Qui est le créateur de Mickey Mouse ?",
+      "answer": "Walt Disney"
+    },
+    {
+      "question": "Quel est le nom du sorcier dans 'Le Seigneur des Anneaux' ?",
+      "answer": "Gandalf"
+    },
+    {
+      "question": "Quel personnage possède un anneau qui rend invisible ?",
+      "answer": "Frodon"
+    },
+    {
+      "question": "Dans quel film peut-on voir un dinosaure nommé 'Rex' ?",
+      "answer": "Toy Story"
+    },
+    {
+      "question": "Quel film a remporté l'Oscar du meilleur film en 1994 ?",
+      "answer": "Forrest Gump"
+    },
+    {
+      "question": "Qui incarne Iron Man dans l'univers cinématographique Marvel ?",
+      "answer": "Robert Downey Jr."
+    }
+  ],
+  "Littérature": [
+    {
+      "question": "Qui a écrit 'Les Misérables' ?",
+      "answer": "Victor Hugo"
+    },
+    {
+      "question": "Quel est le titre du célèbre roman d'Antoine de Saint-Exupéry ?",
+      "answer": "Le Petit Prince"
+    },
+    {
+      "question": "Quel détective a été créé par Sir Arthur Conan Doyle ?",
+      "answer": "Sherlock Holmes"
+    },
+    {
+      "question": "Quelle œuvre commence par 'Il était une fois' ?",
+      "answer": "Un conte"
+    },
+    {
+      "question": "Qui a écrit '1984' ?",
+      "answer": "George Orwell"
+    },
+    {
+      "question": "Quelle est l'œuvre la plus célèbre de J.R.R. Tolkien ?",
+      "answer": "Le Hobbit"
+    }
+  ],
+  "Musique": [
+    {
+      "question": "Quel groupe a chanté 'Bohemian Rhapsody' ?",
+      "answer": "Queen"
+    },
+    {
+      "question": "Quel est l'instrument de prédilection de Mozart ?",
+      "answer": "Piano"
+    },
+    {
+      "question": "Qui est surnommé 'le Roi de la Pop' ?",
+      "answer": "Michael Jackson"
+    },
+    {
+      "question": "Quel est le nom de la chanteuse du hit 'Hello' ?",
+      "answer": "Adele"
+    },
+    {
+      "question": "Qui a chanté 'Like a Rolling Stone' ?",
+      "answer": "Bob Dylan"
+    },
+    {
+      "question": "Quel groupe a composé 'Stairway to Heaven' ?",
+      "answer": "Led Zeppelin"
+    }
+  ],
+  "Technologie": [
+    {
+      "question": "Quel est le système d'exploitation développé par Google ?",
+      "answer": "Android"
+    },
+    {
+      "question": "Quelle société a créé l'iPhone ?",
+      "answer": "Apple"
+    },
+    {
+      "question": "En quelle année le premier homme a-t-il marché sur la Lune ?",
+      "answer": "1969"
+    },
+    {
+      "question": "Que signifie l'acronyme 'WWW' ?",
+      "answer": "World Wide Web"
+    },
+    {
+      "question": "Quel est le nom de l'assistant virtuel développé par Apple ?",
+      "answer": "Siri"
+    },
+    {
+      "question": "Qui a inventé le téléphone ?",
+      "answer": "Alexander Graham Bell"
     }
   ]
 }

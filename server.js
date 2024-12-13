@@ -48,31 +48,44 @@ app.prepare().then(() => {
     io.emit("quiz_started", true);
     io.emit("quiz_question", "");
 
+    let seenQuestions = new Set();
+
     function sendQuestion() {
       const categories = Object.keys(questionsData);
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      randomQuestion = questionsData[randomCategory][Math.floor(Math.random() * questionsData[randomCategory].length)];
-      io.emit("quiz_question", randomQuestion.question);
+      let randomCategory, randomQuestionIndex;
+
+      do {
+      randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      randomQuestionIndex = Math.floor(Math.random() * questionsData[randomCategory].length);
+      } while (seenQuestions.has(`${randomCategory}-${randomQuestionIndex}`) && seenQuestions.size < Object.keys(questionsData).reduce((acc, category) => acc + questionsData[category].length, 0));
+
+      if (seenQuestions.size >= Object.keys(questionsData).reduce((acc, category) => acc + questionsData[category].length, 0)) {
+      seenQuestions.clear();
+      }
+
+      randomQuestion = questionsData[randomCategory][randomQuestionIndex];
+      randomQuestion.category = randomCategory;
+      seenQuestions.add(`${randomCategory}-${randomQuestionIndex}`);
+      io.emit("quiz_question", randomQuestion);
 
       questionTimer = setTimeout(() => {
-        if (Object.keys(currentAnswers).length === 0) {
-          // Personne n'a répondu
-          io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}. Personne n'a répondu.`);
-          endQuiz(false);
-          startQuiz();
-        } else {
-          // Calculer le classement seulement si des réponses existent
-          io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}.`);
-          calculateLeaderboard();
-          endQuiz(false);
-          startQuiz(); // Redémarrer le quiz
-        }
-      }, 16000);
+      if (Object.keys(currentAnswers).length === 0) {
+        io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}. Personne n'a répondu.`);
+        calculateLeaderboard();
+        endQuiz(false);
+        startQuiz();
+      } else {
+        io.emit("toast_message", `Temps écoulé ! La bonne réponse était : ${randomQuestion.answer}.`);
+        calculateLeaderboard();
+        endQuiz(false);
+        startQuiz();
+      }
+      }, 18000); // ajoute 3 secondes pour laisser une marge de temps pour les réponses
     }
 
     setTimeout(() => {
       sendQuestion();
-    }, 5000);
+    }, 10000); // 10 secondes avant la prochaine question
   }
 
   function endQuiz(retry) {
@@ -89,19 +102,16 @@ app.prepare().then(() => {
   function calculateLeaderboard() {
     if (Object.keys(currentAnswers).length === 0) {
       consoleLog("Aucune réponse n'a été enregistrée, aucun point n'est attribué.");
-      return; // Ne pas calculer le classement si aucune réponse
+    } else {
+      // Trier les réponses par temps pris pour répondre
+      const sortedAnswers = Object.values(currentAnswers).sort((a, b) => a.timeTaken - b.timeTaken);
+
+      // Attribuer des points uniquement aux joueurs qui ont répondu
+      sortedAnswers.forEach((answer, index) => {
+        const points = 10 - index; // Le premier obtient 10 points, le deuxième 9, etc.
+        playerScores[answer.socketId] = (playerScores[answer.socketId] || 0) + Math.max(points, 1); // Minimum de 1 point
+      });
     }
-
-    // Trier les réponses par temps pris pour répondre
-    const sortedAnswers = Object.values(currentAnswers).sort((a, b) => a.timeTaken - b.timeTaken);
-
-    // Attribuer des points uniquement aux joueurs qui ont répondu
-    sortedAnswers.forEach((answer, index) => {
-      const points = 10 - index; // Le premier obtient 10 points, le deuxième 9, etc.
-      playerScores[answer.socketId] = (playerScores[answer.socketId] || 0) + Math.max(points, 1); // Minimum de 1 point
-    });
-
-    consoleLog(`Scores des joueurs : ${JSON.stringify(playerScores)}`);
 
     // Nettoyer les scores pour les joueurs déconnectés
     const activePlayerIds = connectedPlayers.map((player) => player.id);
@@ -115,13 +125,15 @@ app.prepare().then(() => {
     const leaderboard = Object.entries(playerScores)
       .map(([id, score]) => {
         const player = connectedPlayers.find((p) => p.id === id);
+        const timeTaken = currentAnswers[id] ? currentAnswers[id].timeTaken : null;
         // Vérifie si le joueur existe, sinon utilise un nom générique
-        return { username: player ? player.username : "Joueur inconnu", score };
+        return { username: player ? player.username : "Joueur inconnu", score, timeTaken };
       })
       .sort((a, b) => b.score - a.score);
 
     io.emit("leaderboard", leaderboard);
     consoleLog(`Classement actuel :${JSON.stringify(playerScores)}`);
+    console.log(leaderboard);
   }
 
 
@@ -149,7 +161,7 @@ app.prepare().then(() => {
 
       io.emit("players", connectedPlayers.map((player) => player.username));
       socket.emit("quiz_started", quizStarted);
-      socket.emit("quiz_question", randomQuestion.question);
+      socket.emit("quiz_question", randomQuestion);
     });
 
     socket.on("message", (data) => {    
