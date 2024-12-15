@@ -55,7 +55,7 @@ const QuizInterface = ({ quizStarted }) => {
       socket.off("quiz_started", handleQuizStarted);
       socket.off("quiz_question", handleQuizQuestion);
     };
-  }, [quizStarted, timeLeft, timeLimit, startTimer]);
+  }, [quizStarted, timeLeft, timeLimit, startTimer, quizQuestion.answer]);
 
   useEffect(() => {
     if (!quizStarted) {
@@ -74,7 +74,7 @@ const QuizInterface = ({ quizStarted }) => {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center h-1/2 p-3 relative transition-colors duration-500 ${bgColor}`}
+      className={`overflow-scroll flex flex-col items-center justify-center h-1/2 p-3 relative transition-colors duration-500 ${bgColor}`}
       style={{ transition: "background-color 1s ease-in-out" }}
     >
       <AnimatePresence>

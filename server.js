@@ -64,6 +64,11 @@ app.prepare().then(() => {
       }
 
       randomQuestion = questionsData[randomCategory][randomQuestionIndex];
+      if (!randomQuestion || !randomQuestion.answer) {
+        consoleLog("Erreur : la question sélectionnée est invalide.", "error");
+        io.emit("toast_error", "Une erreur est survenue avec la question sélectionnée.");
+        return;
+      }
       randomQuestion.category = randomCategory;
       seenQuestions.add(`${randomCategory}-${randomQuestionIndex}`);
       io.emit("quiz_question", randomQuestion);
@@ -178,10 +183,10 @@ app.prepare().then(() => {
         socket.emit("toast_error", "Erreur : pseudo manquant. Veuillez rejoindre à nouveau.");
         return;
       }
-
-      let similarity = stringSimilarity(data.response, randomQuestion.answer);
-
+      
       if (quizStarted) {
+        let similarity = stringSimilarity(data.response, randomQuestion.answer);
+
         if (similarity >= 0.9) {
           socket.emit("toast_message", `Bravo ${socket.username} ! La réponse est correcte. (Temps de réponse : ${data.timeTaken} secondes)`);
           quizAnsweredCorrectly = true;
